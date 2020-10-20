@@ -161,16 +161,15 @@ def main(screen):
 	# working state
 
 	screen.refresh()
-	
-	while 1:
-		key = screen.getkey()
+	key = ""
 
-	# 	if key == curses.KEY_DOWN and curPageNum < maxPageNum:
-	# 		curPageNum += 1
-	# 	elif key == curses.KEY_UP and curPageNum > 0:
-	# 		curPageNum -= 1
-	# 	elif key == "x":
-	# 		break
+	while 1:
+		if key == curses.KEY_DOWN and curPageNum < maxPageNum:
+			curPageNum += 1
+		elif key == curses.KEY_UP and curPageNum > 0:
+			curPageNum -= 1
+		elif key == "x":
+			break
 
 		for i in range(curPageNum*(iconColumns*iconRows),len(fileAndFolderList)):
 			if i == 0:
@@ -203,7 +202,10 @@ def main(screen):
 				xOffset = 0
 				yOffset += 1
 
+		screen.refresh()
 		# allowing the screen to update, and show the new changes
+		key = screen.getkey()
+		# pausing execution until the user's next keypress
 		
 		# time.sleep(0.01)
 
