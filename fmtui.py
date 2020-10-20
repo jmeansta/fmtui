@@ -160,50 +160,51 @@ def main(screen):
 	# Take things out of this loop and remove lines 163 - 170 to reset the program back to a previously
 	# working state
 
-	while 1:
-		key = screen.getch()
+	# while 1:
+	# 	key = screen.getch()
 
-		if key == curses.KEY_DOWN and curPageNum < maxPageNum:
-			curPageNum += 1
-		elif key == curses.KEY_UP and curPageNum > 0:
-			curPageNum -= 1
-		elif key == "x":
+	# 	if key == curses.KEY_DOWN and curPageNum < maxPageNum:
+	# 		curPageNum += 1
+	# 	elif key == curses.KEY_UP and curPageNum > 0:
+	# 		curPageNum -= 1
+	# 	elif key == "x":
+	# 		break
+
+	for i in range(curPageNum*(iconColumns*iconRows),len(fileAndFolderList)):
+		if i == 0:
+			typeOfIcon = "<"
+			# The first icon to display should always be the "up one directory" arrow
+		elif i <= len(onlyDirectories):
+			typeOfIcon = "directory"
+		elif i != len(fileAndFolderList)-1:
+			typeOfIcon = "file"
+		else:
+			typeOfIcon = "+"
+			# The last icon to display is always the "add new file or folder" icon
+		
+		# Given the type of icon from the if statements above, this actually prints it to the screen
+		# along with its name. The equations surrounding yOffset and xOffset convert their icon column and
+		# Icon row positions into positions on the terminal screen
+		printIcon(screen,3+(yOffset*9),3+(xOffset*13),typeOfIcon,fileAndFolderList[i])
+
+		# This adjusts the position where the icon is printed for the next cycle of the loop
+		# i is 0 indexed, so both cases where 1 is added make it 1 indexed for the sake of math
+		# The first if statement checks to see if all of the spaces for icons are used up
+		# If no more icons can be printed, the second if statement resets the xOffset, and moves the yOffset
+		# down one row
+		if i+1 == (iconColumns*iconRows):
+			xOffset = 0
+			yOffset = 0
 			break
+		xOffset += 1
+		if (i+1)%iconColumns == 0:
+			xOffset = 0
+			yOffset += 1
 
-		for i in range(curPageNum*(iconColumns*iconRows),len(fileAndFolderList)):
-			if i == 0:
-				typeOfIcon = "<"
-				# The first icon to display should always be the "up one directory" arrow
-			elif i <= len(onlyDirectories):
-				typeOfIcon = "directory"
-			elif i != len(fileAndFolderList)-1:
-				typeOfIcon = "file"
-			else:
-				typeOfIcon = "+"
-				# The last icon to display is always the "add new file or folder" icon
-			
-			# Given the type of icon from the if statements above, this actually prints it to the screen
-			# along with its name. The equations surrounding yOffset and xOffset convert their icon column and
-			# Icon row positions into positions on the terminal screen
-			printIcon(screen,3+(yOffset*9),3+(xOffset*13),typeOfIcon,fileAndFolderList[i])
+	# allowing the screen to update, and show the new changes
+	screen.refresh()
 
-			# This adjusts the position where the icon is printed for the next cycle of the loop
-			# i is 0 indexed, so both cases where 1 is added make it 1 indexed for the sake of math
-			# The first if statement checks to see if all of the spaces for icons are used up
-			# If no more icons can be printed, the second if statement resets the xOffset, and moves the yOffset
-			# down one row
-			if i+1 == (iconColumns*iconRows):
-				xOffset = 0
-				yOffset = 0
-				break
-			xOffset += 1
-			if (i+1)%iconColumns == 0:
-				xOffset = 0
-				yOffset += 1
-
-		# allowing the screen to update, and show the new changes
-		screen.refresh()
-
+	time.sleep(10)
 
 	# clearing the screen
 	screen.clear()
