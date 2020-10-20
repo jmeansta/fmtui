@@ -160,8 +160,10 @@ def main(screen):
 	# Take things out of this loop and remove lines 163 - 170 to reset the program back to a previously
 	# working state
 
+	screen.refresh()
+	
 	while 1:
-	# 	key = screen.getch()
+		key = screen.getkey()
 
 	# 	if key == curses.KEY_DOWN and curPageNum < maxPageNum:
 	# 		curPageNum += 1
@@ -202,8 +204,8 @@ def main(screen):
 				yOffset += 1
 
 		# allowing the screen to update, and show the new changes
-		screen.refresh()
-		time.sleep(0.01)
+		
+		# time.sleep(0.01)
 
 	# clearing the screen
 	screen.clear()
