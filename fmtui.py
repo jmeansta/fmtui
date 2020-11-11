@@ -49,7 +49,12 @@ logTextFile.close()
 # print(centralLine)
 # print(bottomLine)
 
-
+class directoryItem:
+	def __init__(self, label, iconName, xPos, yPos):
+		self.label = label
+		self.iconName = iconName
+		self.xPos = xPos
+		self.yPos = yPos
 
 def log(cursesScreenObject, text):
 	logTextFile = open("fmtuiFullLog.txt", "a")
@@ -63,26 +68,27 @@ def log(cursesScreenObject, text):
 	logTextFile.close()
 	cursesScreenObject.addstr(os.get_terminal_size().lines-1,0,text)
 
-def printIcon(cursesScreenObject, line, column, type, text=""):
+def printIcon(cursesScreenObject, directoryItemObject):#, line, column, type, text=""):
 	# add input validation so that you can't print outside of the boundries of the screen
 
-	if type=="+":
+	if directoryItemObject.iconName=="+":
 		iconStrArray = ["    _    ","  _| |_  "," |     | ","  ‾| |‾  ","    ‾    "]
-		text = "Add File Or Folder"
-	elif type=="<":
+		# text = "Add File Or Folder"
+	elif directoryItemObject.iconName=="<":
 		iconStrArray = ["  ,      "," /|_____ ","|       |"," \\|‾‾‾‾‾ ","  `      "]
-		text = "Up One   Directory"
-	elif type=="directory":
+		# text = "Up One   Directory"
+	elif directoryItemObject.iconName=="directory":
 		iconStrArray = [" __      ","|  \\____ ","|       |","|       |"," ‾‾‾‾‾‾‾ "]
-	elif type=="file":
+	elif directoryItemObject.iconName=="file":
 		iconStrArray = ["  ___    "," |   |\\  "," |    ‾| "," |     | ","  ‾‾‾‾‾  "]
 	else:
 		iconStrArray = ["..-#-#-#-#-..","..#-#-#-#-#..","..-#-#-#-#-..","..#-#-#-#-#..","..-#-#-#-#-.."]
-		for i in range(0,5):
-			cursesScreenObject.addstr(line+i,column,iconStrArray[i])
-		return
+		# for i in range(0,5):
+		# 	cursesScreenObject.addstr(directoryItemObject.yPos+i,directoryItemObject.xPos,iconStrArray[i])
+		# return
 
 	filenameStrArray = []
+	text = directoryItemObject.label
 
 	filenameStrArray.append(text[0:9])
 	text = text[9:]
@@ -97,9 +103,9 @@ def printIcon(cursesScreenObject, line, column, type, text=""):
 
 	for i in range(0,5):
 		# cursesScreenObject.addstr(line+i,column,"  " + iconStrArray[i] + "  ")
-		cursesScreenObject.addstr(line+i,column,iconStrArray[i])
+		cursesScreenObject.addstr(directoryItemObject.yPos+i,directoryItemObject.xPos,iconStrArray[i])
 	for i in range(5,8):
-		cursesScreenObject.addstr(line+i,column,filenameStrArray[i-5])
+		cursesScreenObject.addstr(directoryItemObject.yPos+i,directoryItemObject.xPos,filenameStrArray[i-5])
 
 def main(screen):
 	# Hiding the cursor
@@ -151,6 +157,24 @@ def main(screen):
 	iconColumns = (os.get_terminal_size().columns-3)//13
 	iconRows = (os.get_terminal_size().lines-4)//9
 
+	# xOffset and yOffset are used to position the icons on the screen, and represent the icon column and row
+	# instead of the actual column and row on the terminal.
+	xOffset = 0
+	yOffset = 0
+
+	# scrollNeeded is set to true if there isn't enough space on just one page to put all of the icons
+	# scrollNeeded = False
+	# if len(fileAndFolderList)>(iconColumns*iconRows):
+	# 	scrollNeeded = True
+
+	# This code is used to initialize the current page variable, and figure out how many pages are needed to
+	# fully display the contents of a directory. The doubble minus signs are a trick to use ceiling integer
+	# division, instead of floor integer division, which is documented here:
+	# https://stackoverflow.com/questions/14822184/is-there-a-ceiling-equivalent-of-operator-in-python
+	# I am subtracting 1 from it at the end because curPageNum is zero indexed
+	# curPageNum = 0
+	# maxPageNum = -(-len(fileAndFolderList)//(iconColumns*iconRows)) - 1	
+
 	# these next two lines can be used to get a directory with fewer items in it, and switch back
 	# os.chdir("/Users/joannm/Desktop/Programming/Python/shRender")
 	# os.chdir("/Users/joannm/Desktop/Programming/Python/yatui")
@@ -158,35 +182,56 @@ def main(screen):
 	# These two pieces of code are extremely minified, and shamelessly stolen from stackoverflow
 	# https://stackoverflow.com/questions/3207219/how-do-i-list-all-files-of-a-directory
 	# onlyFiles and onlyDirectories are lists of strings containing the names of files and directories, respectively
-	onlyFiles = [f for f in os.listdir(os.getcwd()) if os.path.isfile(os.path.join(os.getcwd(), f))]
-	onlyDirectories = [f for f in os.listdir(os.getcwd()) if not(os.path.isfile(os.path.join(os.getcwd(), f)))]
+
+	# onlyFiles = [f for f in os.listdir(os.getcwd()) if os.path.isfile(os.path.join(os.getcwd(), f))]
+	# onlyDirectories = [f for f in os.listdir(os.getcwd()) if not(os.path.isfile(os.path.join(os.getcwd(), f)))]
+
 	# This makes one list with all of the directories and files in it.
 	# The two additional elements at the beginning and end are for the "up one directory" and "add file/folder" icons
-	fileAndFolderList = [""] + onlyDirectories + onlyFiles + [""]
 
-	# xOffset and yOffset are used to position the icons on the screen, and represent the icon column and row
-	# instead of the actual column and row on the terminal.
-	xOffset = 0
-	yOffset = 0
+	# fileAndFolderList = [""] + onlyDirectories + onlyFiles + [""]
 
-	# scrollNeeded is set to true if there isn't enough space on just one page to put all of the icons
-	scrollNeeded = False
-	if len(fileAndFolderList)>(iconColumns*iconRows):
-		scrollNeeded = True
+	xInc = 0
+	yInc = 0
 
-	# This code is used to initialize the current page variable, and figure out how many pages are needed to
-	# fully display the contents of a directory. The doubble minus signs are a trick to use ceiling integer
-	# division, instead of floor integer division, which is documented here:
-	# https://stackoverflow.com/questions/14822184/is-there-a-ceiling-equivalent-of-operator-in-python
-	# I am subtracting 1 from it at the end because curPageNum is zero indexed
-	curPageNum = 0
-	maxPageNum = -(-len(fileAndFolderList)//(iconColumns*iconRows)) - 1	
+	fileAndFolderList = [directoryItem("Up One   Directory","back",0,0)]
+	for diName in os.listdir():
+		#di stands for directory item
+		if os.path.isfile(diName):
+			diType = "file"
+		else:
+			diType = "directory"
+		fileAndFolderList.append(directoryItem(diName,diType,xInc,yInc))
+		
+		xInc += 1
+		if xInc == iconColumns:
+			xInc = 0
+			yInc += 1
 
-	# Take things out of this loop and remove lines 163 - 170 to reset the program back to a previously
-	# working state
+		# log(screen, diName + " " + diType + " @ (" + xInc + "," + yInc + ")")
+		# log(screen, "{a} {b} at ({c},{d})".format(a=diName, b=diType, c=xInc, d=yInc))
+	fileAndFolderList = [directoryItem("Add File Or Folder","add",xInc,yInc)]
+
+	"""
+	fileAndFolderLayout = []
+	fileAndFolderLayoutHelper = []
+
+	for di in fileAndFolderList:
+		fileAndFolderLayoutHelper.append(di)
+		log(screen, di.label)
+		xInc += 1
+		if xInc == iconColumns:
+			xInc = 0
+			fileAndFolderLayout.append(fileAndFolderLayoutHelper)
+			fileAndFolderLayoutHelper = []
+			log(screen, "\n")
+	"""
+		
 
 	screen.refresh()
 	key = ""
+
+	"""
 
 	while 1:
 		log(screen, "At the beginning of the loop, curPageNum = " + str(curPageNum))
@@ -241,6 +286,7 @@ def main(screen):
 		# pausing execution until the user's next keypress
 		
 		# time.sleep(0.01)
+	"""
 
 	# clearing the screen
 	screen.clear()
