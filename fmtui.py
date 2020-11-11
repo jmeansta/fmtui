@@ -40,7 +40,7 @@ logTextFile = open("fmtuiFullLog.txt", "a")
 t = time.localtime()
 # This tutorial is very helpful for understanding the format function
 # https://realpython.com/python-formatted-output
-logTextFile.write("\n\nProgram run on {:d}/{:0>2d}/{:0>2d} at {:0>2d}:{:0>2d}:{:0>2d}".format(t.tm_year,t.tm_mon,t.tm_mday,t.tm_hour,t.tm_min,t.tm_sec))
+logTextFile.write("\n\nProgram run on {:d}/{:0>2d}/{:0>2d} at {:0>2d}:{:0>2d}:{:0>2d}\n".format(t.tm_year,t.tm_mon,t.tm_mday,t.tm_hour,t.tm_min,t.tm_sec))
 logTextFile.close()
 
 # print(menuBorderLine)
@@ -53,7 +53,13 @@ logTextFile.close()
 
 def log(cursesScreenObject, text):
 	logTextFile = open("fmtuiFullLog.txt", "a")
-	logTextFile.write(text)
+	try:
+		logTextFile.write(str(text) + "\n")
+	except Exception as e:
+		logTextFile.write("An error ocurred while trying to add a line to the log file")
+		logTextFile.write("This could be because of an error with the data type you are trying to log")
+		print("error displaying text for the log function")
+		raise e
 	logTextFile.close()
 	cursesScreenObject.addstr(os.get_terminal_size().lines-1,0,text)
 
@@ -154,6 +160,8 @@ def main(screen):
 	# onlyFiles and onlyDirectories are lists of strings containing the names of files and directories, respectively
 	onlyFiles = [f for f in os.listdir(os.getcwd()) if os.path.isfile(os.path.join(os.getcwd(), f))]
 	onlyDirectories = [f for f in os.listdir(os.getcwd()) if not(os.path.isfile(os.path.join(os.getcwd(), f)))]
+	# This makes one list with all of the directories and files in it.
+	# The two additional elements at the beginning and end are for the "up one directory" and "add file/folder" icons
 	fileAndFolderList = [""] + onlyDirectories + onlyFiles + [""]
 
 	# xOffset and yOffset are used to position the icons on the screen, and represent the icon column and row
@@ -181,13 +189,16 @@ def main(screen):
 	key = ""
 
 	while 1:
+		log(screen, "At the beginning of the loop, curPageNum = " + str(curPageNum))
 		# log(screen, "key = " + key)
 		if key == "KEY_DOWN" and curPageNum < maxPageNum:
 			curPageNum += 1
-			log(screen, "curPageNum = " + str(curPageNum))
+			log(screen, "recieved key down")
+			log(screen, "updating curPageNum to " + str(curPageNum))
 		elif key == "KEY_UP" and curPageNum > 0:
 			curPageNum -= 1
-			log(screen, "curPageNum = " + str(curPageNum))
+			log(screen, "recieved key down")
+			log(screen, "updating curPageNum to " + str(curPageNum))
 		elif key == "x":
 			break
 
@@ -225,6 +236,7 @@ def main(screen):
 
 		screen.refresh()
 		# allowing the screen to update, and show the new changes
+		log(screen, "execution paused while waiting for user input")
 		key = screen.getkey()
 		# pausing execution until the user's next keypress
 		
