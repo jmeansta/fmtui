@@ -34,11 +34,28 @@ except Exception as e:
 	print("Yatui was not able to get your terminal window size")
 	raise e
 
+# Initializing the log text file
+logTextFile = open("fmtuiFullLog.txt", "a")
+# adding a time stamp to the log before the program is run
+t = time.localtime()
+# This tutorial is very helpful for understanding the format function
+# https://realpython.com/python-formatted-output
+logTextFile.write("\n\nProgram run on {:d}/{:0>2d}/{:0>2d} at {:0>2d}:{:0>2d}:{:0>2d}".format(t.tm_year,t.tm_mon,t.tm_mday,t.tm_hour,t.tm_min,t.tm_sec))
+logTextFile.close()
+
 # print(menuBorderLine)
 # print(menuLine)
 # print(menuBorderLine)
 # print(centralLine)
 # print(bottomLine)
+
+
+
+def log(cursesScreenObject, text):
+	logTextFile = open("fmtuiFullLog.txt", "a")
+	logTextFile.write(text)
+	logTextFile.close()
+	cursesScreenObject.addstr(os.get_terminal_size().lines-1,0,text)
 
 def printIcon(cursesScreenObject, line, column, type, text=""):
 	# add input validation so that you can't print outside of the boundries of the screen
@@ -164,10 +181,13 @@ def main(screen):
 	key = ""
 
 	while 1:
-		if key == curses.KEY_DOWN and curPageNum < maxPageNum:
+		# log(screen, "key = " + key)
+		if key == "KEY_DOWN" and curPageNum < maxPageNum:
 			curPageNum += 1
-		elif key == curses.KEY_UP and curPageNum > 0:
+			log(screen, "curPageNum = " + str(curPageNum))
+		elif key == "KEY_UP" and curPageNum > 0:
 			curPageNum -= 1
+			log(screen, "curPageNum = " + str(curPageNum))
 		elif key == "x":
 			break
 
@@ -201,6 +221,7 @@ def main(screen):
 			if (i+1)%iconColumns == 0:
 				xOffset = 0
 				yOffset += 1
+		# log(screen, "hello")
 
 		screen.refresh()
 		# allowing the screen to update, and show the new changes
